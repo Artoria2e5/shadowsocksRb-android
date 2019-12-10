@@ -84,14 +84,16 @@ data class Profile(
         private val userInfoPattern = "^(.+?):(.*)$".toRegex()
         private val legacyPattern = "^(.+?):(.*)@(.+?):(\\d+?)$".toRegex()
 
-        private val pattern_ssr = "(?i)ssr://([A-Za-z0-9_=-]+)".toRegex()
+        private val base64_pat = "[A-Za-z0-9_=-+/]"
+        private val pattern_ssr = "(?i)ssr://(" + base64_pat + "+)".toRegex()
         private val decodedPattern_ssr = "(?i)^((.+):(\\d+?):(.*):(.+):(.*):(.+)/(.*))".toRegex()
-        private val decodedPattern_ssr_obfsparam = "(?i)(.*)[?&]obfsparam=([A-Za-z0-9_=-]*)(.*)".toRegex()
-        private val decodedPattern_ssr_remarks = "(?i)(.*)[?&]remarks=([A-Za-z0-9_=-]*)(.*)".toRegex()
-        private val decodedPattern_ssr_protocolparam = "(?i)(.*)[?&]protoparam=([A-Za-z0-9_=-]*)(.*)".toRegex()
-        private val decodedPattern_ssr_groupparam = "(?i)(.*)[?&]group=([A-Za-z0-9_=-]*)(.*)".toRegex()
+        private val decodedPattern_ssr_obfsparam = "(?i)(.*)[?&]obfsparam=(" + base64_pat+ "*)(.*)".toRegex()
+        private val decodedPattern_ssr_remarks = "(?i)(.*)[?&]remarks=(" + base64_pat+ "*)(.*)".toRegex()
+        private val decodedPattern_ssr_protocolparam = "(?i)(.*)[?&]protoparam=(" + base64_pat+ "*)(.*)".toRegex()
+        private val decodedPattern_ssr_groupparam = "(?i)(.*)[?&]group=(" + base64_pat + "*)(.*)".toRegex()
 
-        private fun base64Decode(data: String) = String(Base64.decode(data.replace("=", ""), Base64.URL_SAFE), Charsets.UTF_8)
+        private fun base64Decode(data: String) = String(Base64.decode(data.replace("+", "-").replace("/", "_").replace("=", ""),
+                                                                      Base64.URL_SAFE), Charsets.UTF_8)
 
         fun findAllSSRUrls(data: CharSequence?, feature: Profile? = null) = pattern_ssr.findAll(data
                 ?: "").map {
